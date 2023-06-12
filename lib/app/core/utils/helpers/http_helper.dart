@@ -43,12 +43,12 @@ class HttpHelper {
   }
 
   Future<BaseResponse<T>> post<T>(
-    String url, {
-    Map<String, dynamic>? body,
-    T Function(dynamic json)? decoder,
-    Map<String, String>? headers = HttpHelper.basicHeader,
-    Map<String, dynamic>? params,
-  }) async {
+      String url, {
+        Map<String, dynamic>? body,
+        T Function(dynamic json)? decoder,
+        Map<String, String>? headers = HttpHelper.basicHeader,
+        Map<String, dynamic>? params,
+      }) async {
     try {
       log('request for  ${_getUrlWithParams(url, params)}');
       log('with headers $headers');
@@ -56,13 +56,51 @@ class HttpHelper {
       log('with body  $body');
       final response = await http
           .post(
-            Uri.parse(_getUrlWithParams(url, params)),
-            headers: headers,
-            body: body == null ? null : jsonEncode(body),
-          )
+        Uri.parse(_getUrlWithParams(url, params)),
+        headers: headers,
+        body: body == null ? null : jsonEncode(body),
+      )
           .timeout(
-            const Duration(seconds: 60),
-          );
+        const Duration(seconds: 60),
+      );
+      final ret = _responseHandler<T>(response, decoder);
+      log('response from $url with status code ${response.statusCode}');
+      log('with Data ${ret.toString()}');
+      return ret;
+    } on SocketException catch (_) {
+      HttpFailure failure = const NoInternetConnection();
+      errorStreamController.add(failure);
+      throw failure;
+    } on TimeoutException catch (_) {
+      HttpFailure failure = const TimeOutFailure();
+      errorStreamController.add(failure);
+      throw failure;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<BaseResponse<T>> patch<T>(
+      String url, {
+        Map<String, dynamic>? body,
+        T Function(dynamic json)? decoder,
+        Map<String, String>? headers = HttpHelper.basicHeader,
+        Map<String, dynamic>? params,
+      }) async {
+    try {
+      log('request for  ${_getUrlWithParams(url, params)}');
+      log('with headers $headers');
+      log('with Params $params');
+      log('with body  $body');
+      final response = await http
+          .patch(
+        Uri.parse(_getUrlWithParams(url, params)),
+        headers: headers,
+        body: body == null ? null : jsonEncode(body),
+      )
+          .timeout(
+        const Duration(seconds: 60),
+      );
       final ret = _responseHandler<T>(response, decoder);
       log('response from $url with status code ${response.statusCode}');
       log('with Data ${ret.toString()}');

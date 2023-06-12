@@ -22,11 +22,29 @@ class SearchController extends GetxController {
   List<String> predictionList = [];
   String? correctionValue;
   ScrollController scrollController = ScrollController();
+  String representation = 'tfidf';
+  bool firstSwitch = false;
+  String dataType = 'wikir';
+  bool secondSwitch = false;
+  bool isLoadingGetDataType = true;
+  bool isChangeDataType = false;
+
 
   SearchController(this.authRepository);
 
+  void changeRepresentation() {
+    if (representation == 'tfidf') {
+      representation = 'word2vec';
+    } else {
+      representation = 'tfidf';
+    }
+    firstSwitch = !firstSwitch;
+    update();
+  }
+
   @override
   void onInit() {
+    getDataType();
     textController = TextEditingController();
     super.onInit();
   }
@@ -52,8 +70,8 @@ class SearchController extends GetxController {
     errorFailure = null;
     update();
 
-    final result = await authRepository
-        .search(SearchRequestModel(query: textController.text));
+    final result = await authRepository.search(
+        SearchRequestModel(query: textController.text), representation);
     log(result.toString());
     result.fold(
       (failure) {
@@ -105,6 +123,46 @@ class SearchController extends GetxController {
     }, (response) {
       isLoadingCorrection = false;
       correctionValue = response;
+      update();
+    });
+  }
+
+  void changeDataType() async {
+    isChangeDataType = true;
+    update();
+    final result = await authRepository
+        .switchFun(dataType == 'antique' ? 'wikir' : 'antique');
+    result.fold((failure) {
+      isChangeDataType = false;
+      Get.back();
+      update();
+    }, (response) {
+      print("hello");
+      isChangeDataType = false;
+      secondSwitch = !secondSwitch;
+      Get.snackbar("successful", "Data Set Has been Changed successfully",
+          snackPosition: SnackPosition.BOTTOM);
+      update();
+    });
+  }
+
+  void getDataType() async {
+    isLoadingGetDataType = true;
+    errorFailureCorrection = null;
+    update();
+    final result = await authRepository.getDataSet();
+    result.fold((failure) {
+      isLoadingGetDataType = false;
+      Get.back();
+      update();
+    }, (response) {
+      isLoadingGetDataType = false;
+      dataType = response;
+      if (dataType == 'antique') {
+        secondSwitch = true;
+      } else {
+        secondSwitch = false;
+      }
       update();
     });
   }

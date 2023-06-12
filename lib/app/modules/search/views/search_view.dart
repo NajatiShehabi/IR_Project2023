@@ -29,6 +29,47 @@ class SearchView extends GetView<SearchController> {
               key: controller.formKey,
               child: Column(
                 children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text(
+                      "tfidf",
+                      style: context.textTheme.bodyLarge,
+                    ),
+                    Switch(
+                      value: controller.firstSwitch,
+                      onChanged: (_) => controller.changeRepresentation(),
+                      activeColor: context.theme.colorScheme.primary,
+                      activeTrackColor:
+                          context.theme.colorScheme.primary.withOpacity(0.8),
+                    ),
+                    Text(
+                      "word2vec",
+                      style: context.textTheme.bodyLarge,
+                    ),
+                  ]),
+                  (controller.isLoadingGetDataType ||
+                          controller.isChangeDataType)
+                      ? const LoadingBanner()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                              Text(
+                                "wikir",
+                                style: context.textTheme.bodyLarge,
+                              ),
+                              Switch(
+                                value: controller.secondSwitch,
+                                onChanged: (_) => controller.changeDataType(),
+                                activeColor:
+                                    context.theme.colorScheme.secondary,
+                                activeTrackColor: context
+                                    .theme.colorScheme.secondary
+                                    .withOpacity(0.8),
+                              ),
+                              Text(
+                                "antique",
+                                style: context.textTheme.bodyLarge,
+                              ),
+                            ]),
                   CustomFormField(
                     title: "Search Field",
                     controller: controller.textController,

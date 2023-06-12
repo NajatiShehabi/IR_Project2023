@@ -22,10 +22,10 @@ class AuthRepository {
   AuthRepository({required this.apiProvider, required this.localAuthProvider});
 
   Future<Either<Failure, Map<String, String>>> search(
-      SearchRequestModel model) async {
+      SearchRequestModel model, String representation) async {
     try {
       BaseResponse<Map<String, String>> response =
-          await apiProvider.search(model);
+          await apiProvider.search(model, representation);
       return right(response.data!);
     } on Failure catch (e) {
       return left(e);
@@ -36,6 +36,24 @@ class AuthRepository {
       SearchRequestModel model) async {
     try {
       BaseResponse<List<String>> response = await apiProvider.prediction(model);
+      return right(response.data!);
+    } on Failure catch (e) {
+      return left(e);
+    }
+  }
+
+  Future<Either<Failure, bool>> switchFun(String type) async {
+    try {
+      await apiProvider.switchFun(type);
+      return right(true);
+    } on Failure catch (e) {
+      return left(e);
+    }
+  }
+
+  Future<Either<Failure, String>> getDataSet() async {
+    try {
+      BaseResponse<String> response = await apiProvider.getDataSet();
       return right(response.data!);
     } on Failure catch (e) {
       return left(e);
